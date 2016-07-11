@@ -1,0 +1,80 @@
+version: '2'
+services: 
+  postgresql-data:
+    image: busybox
+    volumes:
+      - ./.volumes/postgresql/var/lib/postgresql:/var/lib/postgresql
+  gitlab-data:
+    image: busybox
+    volumes:
+      - ./.volumes/gitlab/home/git/data:/home/git/data
+  redis-data:
+    image: busybox
+    volumes:
+      - ./.volumes/redis/var/lib/redis:/var/lib/redis
+
+ # taken from sameersbn/docker-gitlab
+  postgresql:
+    image: sameersbn/postgresql:9.4
+    restart: always
+    environment:
+      - http_proxy=$http_proxy
+      - https_proxy=$https_proxy
+      - DB_USER=gitlab
+      - DB_PASS=secretpassword
+      - DB_NAME=gitlabhq_production
+    ports:
+      - "6432:5432"
+  gitlab:
+    image: sameersbn/gitlab:8.5.4
+    restart: always
+    volumes_from:
+      - gitlab-data
+    links:
+     - redis:redisio
+     - postgresql:postgresql
+    ports:
+     - "80:80"
+     - "8887:22"
+    environment:
+       - DEBUG=false
+       - TZ=Europe/Minsk
+       - GITLAB_TIMEZONE=Minsk
+
+       - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
+       - GITLAB_HOST=localhost
+       - GITLAB_PORT=80
+       - GITLAB_SSH_PORT=8887
+       - GITLAB_RELATIVE_URL_ROOT=
+
+       - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
+       - GITLAB_NOTIFY_PUSHER=false
+
+       - GITLAB_EMAIL=notifications@example.com
+       - GITLAB_EMAIL_REPLY_TO=noreply@example.com
+       - GITLAB_INCOMING_EMAIL_ADDRESS=reply@example.com
+
+       - GITLAB_BACKUP_SCHEDULE=daily
+       - GITLAB_BACKUP_TIME=01:00
+
+       - SMTP_ENABLED=true
+       - SMTP_DOMAIN=www.example.com
+       - SMTP_HOST=pc208.sam-solutions.net
+       - SMTP_PORT=25
+       - SMTP_USER=
+       - SMTP_PASS=
+       - SMTP_STARTTLS=true
+       - SMTP_AUTHENTICATION=login
+
+       - IMAP_ENABLED=false
+       - IMAP_HOST=imap.gmail.com
+       - IMAP_PORT=993
+       - IMAP_USER=mailer@example.com
+       - IMAP_PASS=password
+       - IMAP_SSL=true
+       - IMAP_STARTTLS=false
+  redis:
+    restart: always
+    image: sameersbn/redis:latest
+    volumes_from:
+      - redis-data
