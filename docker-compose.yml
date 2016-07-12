@@ -44,6 +44,7 @@ services:
     ports:
      - "80:80"
      - "8887:22"
+     - "8855:5005"
     environment:
       - DEBUG=false
       - DB_ADAPTER=postgresql
@@ -72,6 +73,10 @@ services:
 
       - GITLAB_BACKUP_SCHEDULE=daily
       - GITLAB_BACKUP_TIME=01:00
+
+      - GITLAB_REGISTRY_ENABLED=true
+      - GITLAB_REGISTRY_HOST=localhost
+      - GITLAB_REGISTRY_PORT=5005
 
       - SMTP_ENABLED=true
       - SMTP_DOMAIN=www.example.com
