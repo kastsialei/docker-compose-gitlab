@@ -12,7 +12,6 @@ services:
     image: busybox
     volumes:
       - ./.volumes/redis/var/lib/redis:/var/lib/redis
-
  # taken from sameersbn/docker-gitlab
   redis:
     restart: always
@@ -33,6 +32,8 @@ services:
       - DB_EXTENSION=pg_trgm
     ports:
       - "5432:5432"
+    volumes_from:
+      - postgresql-data
   gitlab:
     image: sameersbn/gitlab:8.9.5
     restart: always
